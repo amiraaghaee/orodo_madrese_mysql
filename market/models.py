@@ -1,13 +1,13 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
 
-# class User(models.Model):
-#     username = models.CharField(max_length=50)
-#     password = models.CharField(max_length=50)
-#     first_name = models.CharField(max_length=50)
-#     last_name = models.CharField(max_length=50)
-#     email = models.CharField(max_length=50)
+class Customer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.PROTECT)
+    phone = models.CharField(max_length=20)
+    address = models.TextField()
+    balance = models.IntegerField()
+
 
 class Product(models.Model):
     code = models.CharField(max_length=10)
@@ -25,26 +25,10 @@ class Product(models.Model):
         pass
 
 
-class Customer(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-    phone = models.CharField(max_length=20)
-    address = models.TextField()
-    balance = models.IntegerField()
-
-    def __str__(self):
-        return self.user
-
-    def deposit(self, amount):
-        pass
-
-    def spend(self, amount):
-        pass
-
-
 class OrderRow(models.Model):
     product = models.ForeignKey('Product', on_delete=models.PROTECT)
     order = models.ForeignKey('Order', on_delete=models.PROTECT)
-    amount = models.IntegerField()
+    amount = models.IntegerField(null=True)
 
 
 class Order(models.Model):
@@ -53,8 +37,8 @@ class Order(models.Model):
     STATUS_SUBMITTED = 2
     STATUS_CANCELED = 3
     STATUS_SENT = 4
-
-    customer = models.ForeignKey('Customer', on_delete=models.PROTECT)
+    #
+    # customer = models.ForeignKey('User', on_delete=models.PROTECT)
     order_time = models.DateTimeField()
     total_price = models.IntegerField()
     status_choices = (
@@ -67,11 +51,14 @@ class Order(models.Model):
     status = models.IntegerField(choices=status_choices)
 
     @staticmethod
-    def initiate(customer):
+    def initiate(user):
         return models.ForeignKey('Order', on_delete=models.PROTECT)
 
-    def add_product(self, product, amount):
-        pass
+    @staticmethod
+    def add_product(product, amount):
+        product.inventory += amount
+        if product.inventory >= 0:
+            product.save()
 
     def remove_product(self, product, amount=None):
         pass
