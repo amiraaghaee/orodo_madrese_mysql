@@ -67,7 +67,6 @@ def product_update(request, pk):
 class RegisterAPI(generics.GenericAPIView):
     serializer_class = RegisterSerializer
 
-    @csrf_exempt
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -81,13 +80,11 @@ class RegisterAPI(generics.GenericAPIView):
 class LoginAPI(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
 
-    @csrf_exempt
     def get(self, request, format=None):
         user = User.objects.all()
         serializer = UserSerializer(user, many=True)
         return Response(serializer.data)
 
-    @csrf_exempt
     def post(self, request, format=None):
         serializer = AuthTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
